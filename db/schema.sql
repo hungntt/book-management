@@ -1,112 +1,138 @@
-DROP TABLE IF EXISTS ENROLL;
-DROP TABLE IF EXISTS TEACH;
-DROP TABLE IF EXISTS SIGN;
-DROP TABLE IF EXISTS EXAM_REG;
-DROP TABLE IF EXISTS EXAM;
-DROP TABLE IF EXISTS SESSION;
-DROP TABLE IF EXISTS MODULE;
-DROP TABLE IF EXISTS SEMESTER;
-DROP TABLE IF EXISTS STUDENT;
-DROP TABLE IF EXISTS LECTURER;
-DROP TABLE IF EXISTS ASSISTANT;
+USE keepbook;
+
+DROP TABLE IF EXISTS AUTHOR_WRITE;
+DROP TABLE IF EXISTS STORE_SELL;
+DROP TABLE IF EXISTS BOOK_CATEGORIES;
+DROP TABLE IF EXISTS LIBRARY;
+DROP TABLE IF EXISTS REVIEW;
+DROP TABLE IF EXISTS STATUS;
+DROP TABLE IF EXISTS BOOK;
+DROP TABLE IF EXISTS PUBLISHER;
+DROP TABLE IF EXISTS AUTHOR;
+DROP TABLE IF EXISTS STORE;
+DROP TABLE IF EXISTS CATEGORIES;
 DROP TABLE IF EXISTS ACCOUNT;
+
+
+
+CREATE TABLE PUBLISHER
+(
+    id   INT AUTO_INCREMENT,
+    name VARCHAR(100),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE BOOK
+(
+    isbn         VARCHAR(13) UNIQUE NOT NULL,
+    title        VARCHAR(100)       NOT NULL,
+    publisher_id INT                NOT NULL,
+    publish_date DATE,
+    price        INT,
+    PRIMARY KEY (isbn),
+    FOREIGN KEY (publisher_id) REFERENCES PUBLISHER (id) ON DELETE CASCADE
+);
+
+CREATE TABLE AUTHOR
+(
+    id      INT AUTO_INCREMENT,
+    fname   VARCHAR(30) NOT NULL,
+    lname   VARCHAR(30),
+    country VARCHAR(30),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE AUTHOR_WRITE
+(
+    author_id INT         NOT NULL,
+    book_isbn VARCHAR(13) NOT NULL,
+    PRIMARY KEY (author_id, book_isbn),
+    FOREIGN KEY (author_id) REFERENCES AUTHOR (id),
+    FOREIGN KEY (book_isbn) REFERENCES BOOK (isbn)
+);
+
+
+
+CREATE TABLE STORE
+(
+    id      INT AUTO_INCREMENT,
+    name    VARCHAR(20),
+    website VARCHAR(100),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE STORE_SELL
+(
+    store_id  INT NOT NULL,
+    book_isbn VARCHAR(13),
+    PRIMARY KEY (store_id, book_isbn),
+    FOREIGN KEY (store_id) REFERENCES STORE (id),
+    FOREIGN KEY (book_isbn) REFERENCES BOOK (isbn)
+);
+
+CREATE TABLE CATEGORIES
+(
+    id   INT AUTO_INCREMENT,
+    name VARCHAR(20),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE BOOK_CATEGORIES
+(
+    categories_id INT,
+    book_isbn     VARCHAR(13),
+    FOREIGN KEY (categories_id) REFERENCES CATEGORIES (id),
+    FOREIGN KEY (book_isbn) REFERENCES BOOK (isbn)
+);
 
 CREATE TABLE ACCOUNT
 (
-    id       INT AUTO_INCREMENT,
-    username VARCHAR(25)  NOT NULL UNIQUE,
-    password VARCHAR(128) NOT NULL,
-    fname    VARCHAR(50)  NOT NULL,
-    lname    VARCHAR(50)  NOT NULL,
+    id          INT AUTO_INCREMENT,
+    ACCOUNTname VARCHAR(20) UNIQUE NOT NULL,
+    password    VARCHAR(128)       NOT NULL,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE ASSISTANT
+CREATE TABLE LIBRARY
 (
-    account INT,
-    FOREIGN KEY (account) REFERENCES ACCOUNT (id) ON DELETE RESTRICT,
-    PRIMARY KEY (account)
-);
-
-CREATE TABLE LECTURER
-(
-    account INT,
-    FOREIGN KEY (account) REFERENCES ACCOUNT (id) ON DELETE RESTRICT,
-    PRIMARY KEY (account)
-);
-
-CREATE TABLE STUDENT
-(
-    code    CHAR(8) UNIQUE,
-    account INT,
-    FOREIGN KEY (account) REFERENCES ACCOUNT (id) ON DELETE RESTRICT,
-    PRIMARY KEY (account)
-);
-
-CREATE TABLE SEMESTER
-(
-    id    INT AUTO_INCREMENT,
-    start DATE NOT NULL,
-    end   DATE NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE MODULE
-(
-    id       INT AUTO_INCREMENT,
-    name     VARCHAR(50) NOT NULL,
-    code     VARCHAR(8)  NOT NULL,
-    semester INT         NOT NULL,
-    FOREIGN KEY (semester) REFERENCES SEMESTER (id) ON DELETE RESTRICT,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE SESSION
-(
-    id     INT AUTO_INCREMENT,
-    module INT  NOT NULL,
-    date   DATE NOT NULL,
-    start  TIME NOT NULL,
-    end    TIME NOT NULL,
-    FOREIGN KEY (module) REFERENCES MODULE (id) ON DELETE CASCADE,
+    id         INT AUTO_INCREMENT,
+    name       VARCHAR(30),
+    account_id INT,
+    book_isbn  VARCHAR(13),
     PRIMARY KEY (id),
-    UNIQUE (module, date, start)
+    FOREIGN KEY (account_id) REFERENCES ACCOUNT (id),
+    FOREIGN KEY (book_isbn) REFERENCES BOOK (isbn),
+    UNIQUE (id, account_id)
 );
 
-CREATE TABLE EXAM
+CREATE TABLE REVIEW
 (
-    id       INT AUTO_INCREMENT,
-    module   INT  NOT NULL,
-    date     DATE NOT NULL,
-    deadline DATE NOT NULL,
-    start    TIME NOT NULL,
-    end      TIME NOT NULL,
-    FOREIGN KEY (module) REFERENCES MODULE (id) ON DELETE CASCADE,
-    PRIMARY KEY (id),
-    UNIQUE (module, date)
+    review     VARCHAR(2000),
+    rating     INT(1),
+    account_id INT,
+    book_isbn  VARCHAR(13),
+    timestamp  TIMESTAMP,
+    FOREIGN KEY (account_id) REFERENCES ACCOUNT (id) ON DELETE CASCADE,
+    FOREIGN KEY (book_isbn) REFERENCES BOOK (isbn) ON DELETE CASCADE,
+    PRIMARY KEY (account_id, book_isbn)
 );
 
-CREATE TABLE EXAM_REG
+CREATE TABLE STATUS
 (
-    student INT,
-    exam    INT,
-    date    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student) REFERENCES STUDENT (account) ON DELETE CASCADE,
-    FOREIGN KEY (exam) REFERENCES EXAM (id) ON DELETE CASCADE,
-    PRIMARY KEY (student, exam)
+    status     VARCHAR(20),
+    account_id INT,
+    book_isbn  VARCHAR(13),
+    FOREIGN KEY (account_id) REFERENCES ACCOUNT (id) ON DELETE CASCADE,
+    FOREIGN KEY (book_isbn) REFERENCES BOOK (isbn) ON DELETE CASCADE,
+    PRIMARY KEY (account_id, book_isbn)
 );
+INSERT INTO PUBLISHER(name)
+VALUES ('Nha Nam');
 
-CREATE TABLE SIGN
-(
-    student INT,
-    session INT,
-    date    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student) REFERENCES STUDENT (account) ON DELETE CASCADE,
-    FOREIGN KEY (session) REFERENCES SESSION (id) ON DELETE CASCADE,
-    PRIMARY KEY (student, session)
-);
+INSERT INTO BOOK(ISBN, TITLE, PUBLISHER_ID, PUBLISH_DATE, PRICE)
+VALUES ('1234567890123', 'Laplace', '1', '2018-01-01', '32000');
 
-CREATE TABLE TEACH
+/*CREATE TABLE TEACH
 (
     module   INT,
     lecturer INT,
@@ -123,3 +149,4 @@ CREATE TABLE ENROLL
     FOREIGN KEY (module) REFERENCES MODULE (id) ON DELETE CASCADE,
     PRIMARY KEY (student, module)
 );
+*/
