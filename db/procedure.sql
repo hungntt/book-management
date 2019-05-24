@@ -73,15 +73,17 @@ DROP TRIGGER IF EXISTS CHECK_UPDATE_SESSION;
 
 DELIMITER //
 
--- ---------------- SEMESTER -------------------
+-- ---------------- BOOK -------------------
 
-# create new semester
-CREATE PROCEDURE CREATE_SEMESTER(IN my_start DATE,
-                                 IN my_end DATE)
+/*add book*/
+CREATE PROCEDURE ADD_BOOK(  IN my_isbn VARCHAR(13),
+                            IN my_title VARCHAR(100),
+                            IN my_publisher_id INT,
+                            IN my_publish_date DATE,
+                            IN my_price INT)
 BEGIN
-    INSERT INTO SEMESTER (start, end)
-    VALUES (my_start, my_end);
-    SELECT id, start, end FROM SEMESTER WHERE id = LAST_INSERT_ID();
+    INSERT INTO BOOK (isbn, title, publisher_id, publish_date, price)
+    VALUES (my_isbn, my_title, my_publisher_id, my_publish_date, my_price);
 END //
 
 # view semester
